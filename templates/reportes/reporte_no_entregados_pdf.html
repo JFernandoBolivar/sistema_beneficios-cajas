@@ -1,0 +1,175 @@
+    <style>
+     
+      .container_tabla {
+        font-family: Arial, sans-serif;
+        width: 100%;
+        margin: -3.5em auto;
+        justify-content: center;
+        
+        /* transform: translateX(-2.5em); */
+      }
+      .table {
+        font-size: 5px;
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        table-layout: fixed;
+       
+      }
+     
+       .list {
+        text-align: center;
+        transform: translateX(1.2em);
+      }
+
+      .table th,
+      .table td {
+        border: 1px solid #000;
+        padding: 8px;
+        white-space: normal;
+        text-align: center;
+        word-wrap: break-word;
+        font-size: 10px;
+      }
+      .table th:first-child,
+      .table td:first-child {
+        width: 4%;
+      }
+      .table th:nth-last-child(5),
+      .table td:nth-last-child(5) {
+        width: 7%;
+      }
+      .table th {
+        background-color: #f2f2f2;
+      }
+      .list {
+        text-align: center;
+      }
+      .logos {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 1em;
+      }
+      .logos > p {
+        font-size: 0.6em;
+        margin-left: 0.3em;
+        margin-right: auto;
+        transform: translateY(-2.8em);
+      }
+      .mpj {
+        transform: translateX(-32em);
+        margin-right: auto;
+        left: 0;
+      }
+      .hrr {
+        margin-left: auto;
+        transform: translateX(1.3em);
+      }
+      .mpj,
+      .hrr {
+        padding-top: 1.5em;
+        width: 3.5em;
+      }
+      .table tbody tr {
+        page-break-inside: avoid;
+      }
+       @page {
+        @bottom-center {
+          content: "Pagina  " counter(page) " de " counter(pages);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container_tabla tabla_pdf">
+      <div class="logos">
+        <p>REPUBLICA BOLIVARIANA DE VENEZUELA</p>
+        <img
+          src="{{ url_for('static', filename='css/img/logo.png', _external=True) }}"
+          class="mpj"
+        />
+        <img
+          src="{{ url_for('static', filename='css/img/logo2.png', _external=True) }}"
+          class="hrr"
+        />
+      </div>
+      <p style="text-align: end; font-size: 13px">
+        <b>Generado por:</b> {{ usuario }}
+      </p>
+      <p style="text-align: end; font-size: 13px">
+        <b>Fecha de generación:</b> {{ fecha_actual }}
+      </p>
+      <h1 class="list">Listado de Personas que no han Recibido la Caja</h1>
+      {% if filtro and filtro != 'todos' %}
+        <p style="text-align: center">
+          <b>Estatus:</b>
+          {% if filtro == 'activos' %}Activos
+          {% elif filtro == 'pasivos' %}Pasivos
+          {% elif filtro == 'fuera_pais' %}Fuera del país
+          {% elif filtro == 'fallecidos' %}Fallecidos
+          {% elif filtro == 'requiere_confirmacion' %}Se requiere confirmación
+          {% elif filtro == 'suspendidos_tramite' %}Suspendidos por trámites administrativos
+          {% elif filtro == 'comision_vigente' %}Comisión de Servicio (vigente)
+          {% elif filtro == 'comision_vencida' %}Comisión de Servicio (vencida)
+          {% else %}{{ filtro|capitalize }}{% endif %}
+        </p>
+      {% endif %}
+
+      <div class="table-responsive" style="max-height: 400px; overflow-y: auto">
+        <table class="table table-striped table-bordered m-auto">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Cedula</th>
+              <th scope="col">Codigo</th>
+              <th scope="col">Nombre Completo</th>
+         
+              <th scope="col">Ubicación administrativa</th>
+              <th scope="col">Estatus</th>
+              <th scope="col">Tipo de nómina</th>
+            
+             
+            </tr>
+          </thead>
+          <tbody>
+            {% for registro in registros %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ registro.Cedula }}</td>
+              <td>{{ registro.Code }}</td>
+              <td>{{ registro.Name_Com }}</td>
+     
+          <td>
+            {{registro.Location_Admin if registro.Location_Admin else " "}}
+          </td>
+            
+              <td>
+            {% if registro.Estatus == 1 %} Activo {% elif registro.Estatus == 2
+            %} Pasivo {% elif registro.Estatus == 3 or registro.Estatus == 4 %}
+            Suspendido {% elif registro.Estatus == 5 %} Fuera del país {% elif
+            registro.Estatus == 6 %} Fallecido {% elif registro.Estatus == 7 or
+            registro.Estatus == 8 %} Se requiere verificar {% elif
+            registro.Estatus == 10 %} Comisión de Servicio Vigente{% elif
+            registro.Estatus in [9,11] %} Comisión de Servicio Vencida {% else
+            %} Desconocido {% endif %}
+          </td>
+          <td>{{registro.typeNomina if registro.typeNomina else " " }}</td>
+         
+     
+           {% else %}
+            </tr>
+            {% endfor %} {% if not registros %}
+            <tr>
+              <td colspan="13">No hay datos disponibles</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      <!-- <p class="Nros">Total:<b>{{total_no_entregados}}</b></p> -->
+    </div>
+  
+  </body>
+</html>

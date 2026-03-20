@@ -1,6 +1,11 @@
-{% extends "navbar/navUser.html" %} {% block contentt %}
+{% extends "components/navbar/navUser.html" %} {% block contentt %}
 <div class="ContentVerDatos d-flex justify-content-between align-items-center">
-  <button type="button" class="btn btn-dark deApoyo" data-bs-toggle="modal" data-bs-target="#apoyoModal">
+  <button
+    type="button"
+    class="btn btn-dark deApoyo"
+    data-bs-toggle="modal"
+    data-bs-target="#apoyoModal"
+  >
     Entrega de Apoyo
   </button>
   <button id="ver_datos" class="btn btn-dark">Ver Datos</button>
@@ -16,30 +21,31 @@
   <h1>Buscar Cedula</h1>
   <p>Escriba la Cedula para verificar si esta en el listado</p>
   <form method="POST" action="/">
-    <input type="number" name="cedula" class="cedula" required autocapitalize="off" />
+    <input
+      type="number"
+      name="cedula"
+      class="cedula"
+      required
+      autocapitalize="off"
+    />
     <button type="submit" id="btn" class="btn btn-dark submit">
       Verificar
     </button>
   </form>
 </div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, mensaje in messages %}
-      <div class="alert mse" role="alert">
-        <button id="exit">X</button>
-        {% if category == "success" %}
-          <i class="bx bx-check-circle icons"></i>
-        {% else %}
-          <i class="bx bx-message-square-x icons"></i>
-        {% endif %}
-        <h2>{{ mensaje }}</h2>
-      </div>
-    {% endfor %}
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%} {% for category, mensaje in messages %}
+<div class="alert mse" role="alert">
+  <button id="exit">X</button>
+  {% if category == "success" %}
+  <i class="bx bx-check-circle icons"></i>
+  {% else %}
+  <i class="bx bx-message-square-x icons"></i>
   {% endif %}
-{% endwith %}
-
-{% if mensaje %}
+  <h2>{{ mensaje }}</h2>
+</div>
+{% endfor %} {% endif %} {% endwith %} {% if mensaje %}
 <div class="alert" role="alert">
   <button id="exit">X</button>
   {% if "exitoso" in mensaje.lower() %}
@@ -50,10 +56,13 @@
   <h2>{{ mensaje }}</h2>
   <h4>{{ cedula }}</h4>
   <p>{{ mensaje2 }}</p>
-  
+
   {% if mostrar_boton %}
-  <form action="{{ url_for('consultas.cambiar_estatusComision') }}" method="POST">
-    <input type="hidden" name="cedula" value="{{ cedula }}">
+  <form
+    action="{{ url_for('consultas.cambiar_estatusComision') }}"
+    method="POST"
+  >
+    <input type="hidden" name="cedula" value="{{ cedula }}" />
     <button type="submit" class="btn btn-danger">Permitir entrega</button>
   </form>
   {% endif %}
@@ -70,12 +79,11 @@
             {% if data.Estatus == 2 %}
             <th scope="col">Estado</th>
             {% else %}
-            <th scope="col">Unidad Fisica</th>
             <th scope="col">Unidad Administrativa</th>
             {% endif %}
-             <th scope="col">Estatus</th>
-             <th scope="col">Tipo de nómina</th>
-            <th scope="col">Entregado </th>
+            <th scope="col">Estatus</th>
+            <th scope="col">Tipo de nómina</th>
+            <th scope="col">Entregado</th>
           </tr>
         </thead>
         <tbody>
@@ -83,22 +91,17 @@
             <td>{{ data.Cedula }}</td>
             <td>{{ data.Name_Com }}</td>
             {% if data.Estatus == 2 %}
-            <td>{{ data.ESTADOS  if data.ESTADOS else " "}}</td>
-            
+            <td>{{ data.ESTADOS if data.ESTADOS else " "}}</td>
             {% else %}
-            <td>{{data.Location_Physical if  data.Location_Physical else " " }}</td>
-            <td>{{data.Location_Admin if  data.Location_Admin else " " }}</td>
+            <td>{{data.Location_Admin if data.Location_Admin else " " }}</td>
             {% endif %}
             <td>
-             {% if data.Estatus == 2 %}
-             Pasivo
-             {% elif data.Estatus in [10, 11] %}
-             Comisión de Servicio
-             {% else %}
-               Activo
-             {% endif %}
+              {% if data.Estatus == 2 %} Pasivo {% elif data.Estatus in [10, 11]
+              %} Comisión de Servicio {% else %} Activo {% endif %}
             </td>
-            <td>{{ data.typeNomina if data.typeNomina else "Sin tipo de nómina" }}</td>
+            <td>
+              {{ data.typeNomina if data.typeNomina else "Sin tipo de nómina" }}
+            </td>
             <td>{{ "Sí" if data.Entregado_recientemente else 'No' }}</td>
           </tr>
         </tbody>
@@ -108,7 +111,12 @@
     <div id="formD">
       <form method="POST" action="/registrar" id="registroForm">
         <input type="hidden" name="entregado" value="1" />
-        <input type="hidden" name="cedula" value="{{ data.Cedula }}" /><input type="hidden" id="cedula_titular" name="cedula_titular" value="{{ data.Cedula if data else '' }}">
+        <input type="hidden" name="cedula" value="{{ data.Cedula }}" /><input
+          type="hidden"
+          id="cedula_titular"
+          name="cedula_titular"
+          value="{{ data.Cedula if data else '' }}"
+        />
         <input
           type="hidden"
           name="cedula_personal"
@@ -147,16 +155,80 @@
         class="form-control"
         value="{{ fecha }}"
       />
-     
-    <label for="tipo_usuario" class="estatusLabel">Estatus:</label>
-<select id="tipo_usuario" name="tipo_usuario" class="form-control estatusSelect">
-  <option value="general" {% if tipo_usuario == 'general' %}selected{% endif %}>General</option>
-  <option value="activos" {% if tipo_usuario == 'activos' %}selected{% endif %}>Activos</option>
-  <option value="pasivos" {% if tipo_usuario == 'pasivos' %}selected{% endif %}>Pasivos</option>
-  <option value="de_apoyo" {% if tipo_usuario == 'de_apoyo' %}selected{% endif %}>Apoyo</option>
-  <option value="comision_servicios_alert" {% if tipo_usuario == 'comision_servicios_alert' %}selected{% endif %}>C.S Vencido</option>
-  <option value="comision_servicios_2" {% if tipo_usuario == 'comision_servicios_2' %}selected{% endif %}>C.S</option>
-</select>
+
+      <label for="tipo_usuario" class="estatusLabel">Estatus:</label>
+      <select
+        id="tipo_usuario"
+        name="tipo_usuario"
+        class="form-control estatusSelect"
+      >
+        <option
+          value="general"
+          {%
+          if
+          tipo_usuario=="general"
+          %}selected{%
+          endif
+          %}
+        >
+          General
+        </option>
+        <option
+          value="activos"
+          {%
+          if
+          tipo_usuario=="activos"
+          %}selected{%
+          endif
+          %}
+        >
+          Activos
+        </option>
+        <option
+          value="pasivos"
+          {%
+          if
+          tipo_usuario=="pasivos"
+          %}selected{%
+          endif
+          %}
+        >
+          Pasivos
+        </option>
+        <option
+          value="de_apoyo"
+          {%
+          if
+          tipo_usuario=="de_apoyo"
+          %}selected{%
+          endif
+          %}
+        >
+          Apoyo
+        </option>
+        <option
+          value="comision_servicios_alert"
+          {%
+          if
+          tipo_usuario=="comision_servicios_alert"
+          %}selected{%
+          endif
+          %}
+        >
+          C.S Vencido
+        </option>
+        <option
+          value="comision_servicios_2"
+          {%
+          if
+          tipo_usuario=="comision_servicios_2"
+          %}selected{%
+          endif
+          %}
+        >
+          C.S
+        </option>
+      </select>
       <button type="submit" class="btn btn-dark">Filtrar</button>
     </form>
     {% endif %}
@@ -167,53 +239,90 @@
       </p>
       {% else %}
       <p>
-        Total de personas que han recibido el beneficio: <b>{{ total_recibido }}</b>
+        Total de personas que han recibido el beneficio:
+        <b>{{ total_recibido }}</b>
       </p>
       <p>Total de Personal: <b>{{ total_personas }}</b></p>
       <p>
-        Total de Personal que faltan por recibir el beneficio: <b>{{ faltan }}</b>
+        Total de Personal que faltan por recibir el beneficio:
+        <b>{{ faltan }}</b>
       </p>
       {% endif %}
     </article>
-    {% if session.get('Super_Admin') == 0 %}
-    
-    {% endif %}
+    {% if session.get('Super_Admin') == 0 %} {% endif %}
   </section>
 </div>
 
-
 <!-- DE APOYO -->
 
-<div class="modal fade" id="apoyoModal" tabindex="-1" aria-labelledby="apoyoModalLabel" aria-hidden="true">
+<div
+  class="modal fade"
+  id="apoyoModal"
+  tabindex="-1"
+  aria-labelledby="apoyoModalLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="POST" action="{{ url_for('consultas.registrar_apoyo') }}">
         <div class="modal-header">
           <h5 class="modal-title ml-5" id="apoyoModalLabel">Registrar Apoyo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Cerrar"
+          ></button>
         </div>
         <div class="modal-body">
-         
-         
           <div class="row">
-            <div class="mb-3 col-md-6 divApoyo ">
-              <label for="ci_autorizado" class="form-label">Cédula del Autorizado</label>
-              <input type="number" class="form-control" id="ci_autorizado" min="1000000" name="ci_autorizado" required autocapitalize="off">
+            <div class="mb-3 col-md-6 divApoyo">
+              <label for="ci_autorizado" class="form-label"
+                >Cédula del Autorizado</label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="ci_autorizado"
+                min="1000000"
+                max="1000000000"
+                name="ci_autorizado"
+                required
+                autocapitalize="off"
+              />
             </div>
-            <div class="mb-3  col-md-6 divApoyo">
-              <label for="nombre_autorizado" class="form-label">Nombre del Autorizado</label>
-              <input type="text" class="form-control" id="nombre_autorizado" name="nombre_autorizado" required autocapitalize="off">
+            <div class="mb-3 col-md-6 divApoyo">
+              <label for="nombre_autorizado" class="form-label"
+                >Nombre del Autorizado</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="nombre_autorizado"
+                name="nombre_autorizado"
+                required
+                autocapitalize="off"
+              />
             </div>
-           
           </div>
           <div class="mb-3 divApoyo">
             <label for="cantidad" class="form-label">Cantidad </label>
-            <input type="number" class="form-control " id="cantidad" name="cantidad" min="1" required autocapitalize="off">
+            <input
+              type="number"
+              class="form-control"
+              id="cantidad"
+              name="cantidad"
+              min="1"
+              max="100000"
+              required
+              autocapitalize="off"
+            />
           </div>
         </div>
         <div class="modal-footer">
-         
-          <button type="submit" class="btn btn-dark EntregaApoyo ">Entregar apoyo</button>
+          <button type="submit" class="btn btn-dark EntregaApoyo">
+            Entregar apoyo
+          </button>
         </div>
       </form>
     </div>

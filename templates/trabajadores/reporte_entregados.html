@@ -1,0 +1,294 @@
+{% extends "components/navbar/navUser.html" %} {% block contentt %}
+<link
+  rel="stylesheet"
+  href="{{url_for('static', filename='css/pdf_listados.css')}}"
+/>
+<div class="container_tabla">
+  <div class="header_tabla">
+    <button class="exit_tabla">
+      <i class="bx bx-log-out"></i><label class="salir">Salir</label>
+    </button>
+    <div class="alert windwsPDF mse" role="alert">
+      <a
+        id="exit"
+        class="btn me-3"
+        href="{{ url_for('gestion_trabajadores.reporte_personal') }}"
+        >X</a
+      >
+      <h1 class="fs-3 report mt-1 text-center">
+        Listado de beneficios entregados
+      </h1>
+      <hr class="my-3" />
+      <form
+        method="get"
+        action="{{ url_for('gestion_trabajadores.reporte_personalPDF') }}"
+        class="form-fecha mt-3"
+      >
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <label for="filtroCedula" class="form-label"
+              >Cédula del beneficiario</label
+            >
+            <input
+              type="text"
+              id="filtroCedula"
+              name="cedula"
+              placeholder="Cédula beneficiario"
+              value="{{ cedula }}"
+              class="form-control"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="filtroFecha" class="form-label"
+              >Día de la entrega</label
+            >
+            <input
+              type="date"
+              id="filtroFecha"
+              name="fecha"
+              value="{{ fecha }}"
+              class="form-control"
+              placeholder="Fecha de la entrega"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="filtroMes" class="form-label">Mes y año</label>
+            <input
+              type="month"
+              id="filtroMes"
+              name="mes"
+              value="{{ mes }}"
+              class="form-control"
+              placeholder="Mes"
+              min="2025-01"
+              max="2100-12"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="filtroEstatus" class="form-label">Estatus</label>
+            <select id="filtroEstatus" name="estatus" class="form-control">
+              <option value="">Todos los estatus</option>
+              <option value="activo" {% if estatus == "activo" %}selected{% endif %}>Activo</option>
+              <option value="pasivo" {% if estatus == "pasivo" %}selected{% endif %}>Pasivo</option>
+              
+             
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label for="filtroTipoNomina" class="form-label"
+              >Tipo de Nómina (Opcional)</label
+            >
+            <select
+              id="filtroTipoNomina"
+              name="tipo_nomina"
+              class="form-control"
+            >
+              <option value="">Todos los tipos</option>
+              <option value="JUBILADO EMPLEADO">JUBILADO EMPLEADO</option>
+              <option value="JUBILADO EXTINTA DISIP">
+                JUBILADO EXTINTA DISIP
+              </option>
+              <option value="JUBILADO OBRERO">JUBILADO OBRERO</option>
+              <option value="JUBILADO POLICIA METROPOLITANO (ADMI)">
+                JUBILADO POLICIA METROPOLITANO (ADMI)
+              </option>
+              <option value="PENSIONADO INCAP/VIUDA EXTINTA DISIP">
+                PENSIONADO INCAP/VIUDA EXTINTA DISIP
+              </option>
+              <option value="PENSIONADO INCAPACIDAD EMPLEADO">
+                PENSIONADO INCAPACIDAD EMPLEADO
+              </option>
+              <option value="PENSIONADO SOBREVIVIENTE">
+                PENSIONADO SOBREVIVIENTE
+              </option>
+              <option value="PENSIONADOS MENORES EXTINTA DISIP">
+                PENSIONADOS MENORES EXTINTA DISIP
+              </option>
+            </select>
+          </div>
+          <div class="col-12 d-flex justify-content-center mt-3">
+            <button
+              type="submit"
+              name="pdf"
+              value="1"
+              class="btn btn-dark w-100 w-md-auto"
+            >
+              Descargar PDF
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <a class="btn btn-dark" id="PDFPersonal"
+      >Descargar <i class="bx bxs-download fs-3"></i
+    ></a>
+  </div>
+  <h1>Listado de beneficios entregados</h1>
+  <div class="contentBusc">
+    <button id="search">
+      <i class="bx bx-search buscSearch"></i>
+    </button>
+    <form
+      method="get"
+      action="{{ url_for('gestion_trabajadores.reporte_personal') }}"
+      class="filtrosContent"
+      id="filterForm"
+    >
+      <input
+        type="text"
+        id="buscarCedula"
+        name="cedula"
+        placeholder="Cédula personal"
+        value="{{ cedula }}"
+        onchange="document.getElementById('filterForm').submit()"
+      />
+      <input
+        type="text"
+        id="buscarNombre"
+        name="nombre"
+        placeholder="Nombre"
+        onchange="document.getElementById('filterForm').submit()"
+      />
+      <label for="buscarFecha" style="margin-bottom: 0">Fecha:</label>
+      <input
+        type="date"
+        id="buscarFecha"
+        name="fecha"
+        class="fch"
+        value="{{ fecha }}"
+        onchange="document.getElementById('filterForm').submit()"
+      />
+      <label for="filtroEstatusTemplate" style="margin-bottom: 0"
+        >Estatus:</label
+      >
+      <select
+        id="filtroEstatusTemplate"
+        name="estatus"
+        class="form-control form-control-sm"
+        onchange="document.getElementById('filterForm').submit()"
+        style="width: auto"
+      >
+        <option value="">Todos</option>
+        <option value="activo" {% if estatus=='activo' %}selected{% endif %}>
+          Activo
+        </option>
+        <option value="pasivo" {% if estatus=='pasivo' %}selected{% endif %}>
+          Pasivo
+        </option>
+      </select>
+      <input type="hidden" name="page" value="1" />
+    </form>
+  </div>
+
+  <section
+    class="datos table-responsive"
+    class="table-responsive"
+    id="tabla1"
+    style="max-height: 300px; overflow-y: auto; border-collapse: collapse"
+  >
+    <table class="table table-striped table-bordered" id="historialTable">
+      <thead class="table-dark">
+        <tr>
+          <th scope="col">Cédula del personal</th>
+          <th scope="col">Nombre del personal</th>
+          <th scope="col">Estatus</th>
+          <th scope="col">Tipo de nómina</th>
+          <th scope="col">Fecha de la entrega</th>
+          <th scope="col">Cédula del registrador</th>
+          <th scope="col">Nombre del registrador</th>
+          <th scope="col">Nombre del autorizado</th>
+          <th scope="col">Cédula del autorizado</th>
+          <th scope="col">Observación</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for action in historial %}
+        <tr>
+          <td>
+            {{ action.cedula_personal if action.cedula_personal else ' ' }}
+          </td>
+          <td>{{ action.Name_personal if action.Name_personal else ' ' }}</td>
+
+          <td>
+            {% if action.Estatus == 2 %} Pasivo {% elif action.Estatus == 10 %}
+            Comisión de Servicio Vigente {% elif action.Estatus in [9, 11] %}
+            Comisión de Servicio Vencida {% else %} Activo {% endif %}
+          </td>
+          <td>{{ action.typeNomina if action.typeNomina else ' ' }}</td>
+          <td>{{ action.time_login if action.time_login else ' '}}</td>
+          <td>{{ action.cedula }}</td>
+          <td>{{ action.Name_user }}</td>
+
+          <td>
+            {{action.Name_autorizado if action.Name_autorizado else ' ' }}
+          </td>
+          <td>
+            {{action.Cedula_autorizado if action.Cedula_autorizado else ' '}}
+          </td>
+          <td>{{action.Observation if action.Observation else ' '}}</td>
+        </tr>
+        {% endfor %} {% if not historial %}
+        <tr>
+          <td colspan="9">No hay datos disponibles</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </section>
+
+  <div
+    class="pagination-container d-flex justify-content-center align-items-center mt-3 gap-2"
+  >
+    <span class="me-2"
+      >Total: {{ total }} registros | Página {{ page }} de {{ total_pages
+      }}</span
+    >
+    {% if page > 1 %}
+    <a
+      href="{{ url_for('gestion_trabajadores.reporte_personal', page=1, cedula=cedula, fecha=fecha, mes=mes, estatus=estatus, tipo_nomina=tipo_nomina) }}"
+      class="btn btn-sm btn-dark"
+      >&laquo;</a
+    >
+    <a
+      href="{{ url_for('gestion_trabajadores.reporte_personal', page=page-1, cedula=cedula, fecha=fecha, mes=mes, estatus=estatus, tipo_nomina=tipo_nomina) }}"
+      class="btn btn-sm btn-dark"
+      >&lsaquo;</a
+    >
+    {% else %}
+    <button class="btn btn-sm btn-secondary" disabled>&laquo;</button>
+    <button class="btn btn-sm btn-secondary" disabled>&lsaquo;</button>
+    {% endif %} {% if total_pages > 1 %} {% set start = page - 2 if page > 2
+    else 1 %} {% set end = page + 2 if page < total_pages - 1 else total_pages
+    %} {% for p in range(start, end + 1) %} {% if p == page %}
+    <button class="btn btn-sm btn-primary">{{ p }}</button>
+    {% else %}
+    <a
+      href="{{ url_for('gestion_trabajadores.reporte_personal', page=p, cedula=cedula, fecha=fecha, mes=mes, estatus=estatus, tipo_nomina=tipo_nomina) }}"
+      class="btn btn-sm btn-dark"
+      >{{ p }}</a
+    >
+    {% endif %} {% endfor %} {% endif %} {% if page < total_pages %}
+    <a
+      href="{{ url_for('gestion_trabajadores.reporte_personal', page=page+1, cedula=cedula, fecha=fecha, mes=mes, estatus=estatus, tipo_nomina=tipo_nomina) }}"
+      class="btn btn-sm btn-dark"
+      >&rsaquo;</a
+    >
+    <a
+      href="{{ url_for('gestion_trabajadores.reporte_personal', page=total_pages, cedula=cedula, fecha=fecha, mes=mes, estatus=estatus, tipo_nomina=tipo_nomina) }}"
+      class="btn btn-sm btn-dark"
+      >&raquo;</a
+    >
+    {% else %}
+    <button class="btn btn-sm btn-secondary" disabled>&rsaquo;</button>
+    <button class="btn btn-sm btn-secondary" disabled>&raquo;</button>
+    {% endif %}
+  </div>
+
+  <div class="skp_tabla d-flex justify-content-end mt-4">
+    <button id="next" class="next_tabla">
+      <label class="next">Por Entregar</label>
+      <i class="bx bxs-right-arrow-square"></i>
+    </button>
+  </div>
+</div>
+{% endblock %}
