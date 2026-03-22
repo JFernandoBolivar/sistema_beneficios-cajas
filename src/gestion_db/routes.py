@@ -27,7 +27,7 @@ def requiere_super_admin(func):
 def validar_estructura_excel(df):
     columnas_requeridas = [
         "Cedula", "Name_Com", "Code", 
-        "Location_Admin", "Estatus", "ESTADOS"
+        "Location_Admin", "Estatus", "ESTADOS", "typeNomina"
     ]
     faltantes = [col for col in columnas_requeridas if col not in df.columns]
     if faltantes:
@@ -299,77 +299,44 @@ def vaciar_db():
     
     return redirect(url_for('gestion_db.gestionar_data'))
 
-# Función para generar backup en Excel
-
-def generar_backup_excel():
+def generar_backup_sql():
     try:
         backup_dir = os.path.join(Config.BACKUP_FOLDER)
         os.makedirs(backup_dir, exist_ok=True)
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'data_benficios_{timestamp}.xlsx'
+        timestamp = datetime.now().strftime('%Y-%m-%d')
+        filename = f'backup_beneficios_{timestamp}.sql'
         filepath = os.path.join(backup_dir, filename)
 
-        tablas = ['personal', 'autorizados', 'delivery', 'user_history']
-        tablas_exportadas = 0
+        mysqldump_path = r'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe'
+        mysqldump_cmd = [
+            mysqldump_path,
+            '-h', Config.MYSQL_HOST,
+            '-u', Config.MYSQL_USER,
+            f'--password={Config.MYSQL_PASSWORD}',
+            '--single-transaction',
+            '--quick',
+            '--lock-tables=false',
+            Config.MYSQL_DB
+        ]
 
-        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
-            wb = writer.book
-            wb.create_sheet("Temporal")
+        with open(filepath, 'w', encoding='utf-8') as f:
+            result = subprocess.run(
+                mysqldump_cmd,
+                stdout=f,
+                stderr=subprocess.PIPE,
+                text=True
+            )
 
-            for tabla in tablas:
-                try:
-                    # Usar un cursor nuevo por tabla
-                    tabla_cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                    tabla_cursor.execute(f"SHOW TABLES LIKE '{tabla}'")
-                    if not tabla_cursor.fetchone():
-                        tabla_cursor.close()
-                        continue
+            if result.returncode != 0:
+                raise Exception(f"mysqldump failed: {result.stderr}")
 
-                    tabla_cursor.execute(f"DESCRIBE {tabla}")
-                    columnas = [col[0] for col in tabla_cursor.fetchall()]
-
-                    tabla_cursor.execute(f"SELECT COUNT(*) as total FROM {tabla}")
-                    total_registros = tabla_cursor.fetchone()['total']
-
-                    print(f"Tabla: {tabla}, Total registros: {total_registros}")
-
-                    if total_registros == 0:
-                        df = pd.DataFrame(columns=columnas)
-                    elif total_registros > 10000:
-                        chunk_size = 5000
-                        df_list = []
-                        for offset in range(0, total_registros, chunk_size):
-                            tabla_cursor.execute(f"SELECT * FROM {tabla} LIMIT {chunk_size} OFFSET {offset}")
-                            chunk = tabla_cursor.fetchall()
-                            df_list.append(pd.DataFrame(chunk))
-                        df = pd.concat(df_list, ignore_index=True)
-                    else:
-                        tabla_cursor.execute(f"SELECT * FROM {tabla}")
-                        data = tabla_cursor.fetchall()
-                        df = pd.DataFrame(data)
-
-                    df = df.reindex(columns=columnas, fill_value=None)
-                    df.to_excel(writer, sheet_name=tabla[:31], index=False)
-                    tablas_exportadas += 1
-                    tabla_cursor.close()
-                except Exception as e:
-                    flash(f"Error al exportar tabla {tabla}: {str(e)}", "warning")
-                    continue
-
-            if tablas_exportadas > 0 and "Temporal" in wb.sheetnames:
-                wb.remove(wb["Temporal"])
-            if tablas_exportadas == 0:
-                df = pd.DataFrame({"Mensaje": ["No se encontraron datos para exportar"]})
-                df.to_excel(writer, sheet_name="Información", index=False)
-
-        # Registrar acción en el historial
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('''
             INSERT INTO user_history (cedula, Name_user, action, time_login) 
             VALUES (%s, %s, %s, %s)
         ''', (
             session['cedula'], session['username'],
-            'Generó backup Excel de la base de datos',
+            'Generó backup SQL de la base de datos',
             datetime.now()
         ))
         mysql.connection.commit()
@@ -386,27 +353,26 @@ def generar_backup_excel():
             filepath,
             as_attachment=True,
             download_name=filename,
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            mimetype='application/sql',
         )
         response.call_on_close(cleanup)
         return response
 
     except Exception as e:
         mysql.connection.rollback()
-        flash(f"Error al generar copia de seguridad en Excel: {str(e)}", "danger")
-        return redirect(url_for('gestion_db.gestionar_data'))
+        flash(f"Error al generar backup SQL: {str(e)}", "danger")
+        return None
 
-# Ruta para generar copia de seguridad en Excel
 @gestion_db_bp.route("/backup_excel", methods=["POST"])
 @requiere_super_admin
 def backup_excel_route():
-    response = generar_backup_excel()
+    response = generar_backup_sql()
     if not response:
         flash("Error desconocido al generar la copia de seguridad", "danger")
         return redirect(url_for('gestion_db.gestionar_data'))
     if isinstance(response, str) or getattr(response, "status_code", 200) != 200:
         return response
-    flash("Copia de seguridad generada con éxito", "success")
+    flash("Copia de seguridad SQL generada con éxito", "success")
     return response
     
   

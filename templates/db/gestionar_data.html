@@ -215,7 +215,7 @@
           onclick="iniciarBackup('excel')"
         >
           <i class="bx bx-save me-1" aria-hidden="true"></i> Copia de Seguridad
-          (Excel)
+          (SQL)
         </button>
 
         {% if session.get('Super_Admin') == 1 %}
@@ -325,7 +325,7 @@
     if (!extensionValida) {
       mostrarError(
         "Formato no válido",
-        "Por favor, seleccione un archivo Excel (.xlsx)"
+        "Por favor, seleccione un archivo Excel (.xlsx)",
       );
       resetFileInput();
       return;
@@ -334,7 +334,7 @@
     if (!tamanoValido) {
       mostrarError(
         "Archivo demasiado grande",
-        "El tamaño máximo permitido es 10MB"
+        "El tamaño máximo permitido es 10MB",
       );
       resetFileInput();
       return;
@@ -377,7 +377,7 @@
         e.preventDefault();
         mostrarError(
           "Archivo requerido",
-          "Por favor, seleccione un archivo Excel para cargar"
+          "Por favor, seleccione un archivo Excel para cargar",
         );
       } else {
         Swal.fire({
@@ -396,7 +396,7 @@
   function iniciarBackup(tipo) {
     Swal.fire({
       title: "Confirmar copia de seguridad",
-      text: `¿Desea generar una copia de seguridad en formato ${tipo.toUpperCase()} de la base de datos?`,
+      text: `¿Desea generar una copia de seguridad  de la base de datos?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#17a2b8",
