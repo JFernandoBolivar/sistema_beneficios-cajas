@@ -178,7 +178,7 @@ def reporte_personalPDF():
 
     if request.args.get('pdf') == '1':
         rendered = render_template(
-            'trabajadores/reporte_entregados_pdf.html',
+            'reportes/reporte_entregados_pdf.html',
             historial=historial,
             cedula=cedula,
             fecha=fecha,
@@ -194,7 +194,7 @@ def reporte_personalPDF():
         return response
 
     return render_template(
-        'trabajadores/reporte_entregados_pdf.html',
+        'reportes/reporte_entregados_pdf.html',
         historial=historial,
         cedula=cedula,
         fecha=fecha,

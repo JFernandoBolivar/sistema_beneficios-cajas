@@ -17,10 +17,11 @@
     />
     <style>
       .container_tabla {
+        font-family: Arial, sans-serif;
         width: 100%;
         margin: 0 auto;
         justify-content: center;
-        font-family: Arial, sans-serif;
+        padding-bottom: 2cm;
       }
 
       a {
@@ -86,59 +87,82 @@
       }
       .table th:first-child,
       .table td:first-child {
-        width: 2%;
+        width: 5%;
       }
       .list {
         text-align: center;
       }
       .logos {
+        position: fixed;
+        top: -2cm; /* Lo posicionamos dentro del margen superior */
+        left: 0;
+        right: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        width: 100%;
-        margin-bottom: 1em;
       }
-      .logos > p {
-        font-size: 0.6em;
-        margin-left: 0.3em;
-        margin-right: auto;
-        transform: translateY(-2.8em);
-      }
+
       .mpj {
-        transform: translateX(-37em);
-        margin-right: auto;
-        left: 0;
+        width: 10em;
       }
       .hrr {
-        margin-left: auto;
+        width: 6em;
       }
-      .mpj,
-      .hrr {
-        padding-top: 1.5em;
-        width: 3.5em;
-      }
+
       .table tbody tr {
-        page-break-inside: avoid;
+        page-break-inside: avoid !important;
+        page-break-after: auto;
       }
       @page {
-        margin: 1cm;
+        margin: 2.5cm 1cm 4cm 1cm;
+
         @bottom-center {
-          content: "Pagina " counter(page) " de " counter(pages);
+          content: "Página " counter(page) " de " counter(pages);
+          font-family: Arial, sans-serif;
+          font-size: 15px;
+          color: #333;
+          /* Subimos el número de página para que no se sobreponga al diseño del cintillo */
+          padding-bottom: 40px;
         }
+      }
+      .footer-cintillo {
+        position: fixed;
+        bottom: -5.3cm; /* Empujamos exactamente la misma distancia del margen inferior */
+        left: -1cm; /* Compensamos el margen izquierdo de @page */
+        right: -1cm; /* Compensamos el margen derecho de @page */
+        height: 4cm; /* Restringimos su altura al espacio del margen */
+        z-index: -1; /* Lo enviamos al fondo */
+      }
+
+      .footer-cintillo img {
+        width: 100%; /* Obliga a la imagen a estirarse de borde a borde */
+        height: 65%; /* Obliga a la imagen a ocupar la altura asignada */
+        object-fit: cover; /* Cubre todo el bloque sin deformar demasiado */
+        display: block;
+      }
+
+      /* Asegura que el encabezado de la tabla se repita en cada página */
+      .table thead {
+        display: table-header-group;
       }
     </style>
   </head>
   <body>
     <div class="container_tabla tabla_pdf">
       <div class="logos">
-        <p>REPUBLICA BOLIVARIANA DE VENEZUELA</p>
         <img
-          src="{{ url_for('static', filename='css/img/logo.png', _external=True) }}"
+          src="{{ url_for('static', filename='css/img/logoNuevo.png', _external=True) }}"
           class="mpj"
         />
         <img
-          src="{{ url_for('static', filename='css/img/logo2.png', _external=True) }}"
+          src="{{ url_for('static', filename='css/img/juntosPorVida.png', _external=True) }}"
           class="hrr"
+        />
+      </div>
+      <div class="footer-cintillo">
+        <img
+          src="{{ url_for('static', filename='css/img/cintillo2.png', _external=True) }}"
+          alt="Cintillo"
         />
       </div>
       <p style="text-align: end; font-size: 13px">
@@ -147,7 +171,7 @@
       <p style="text-align: end; font-size: 13px">
         <b>Fecha de generación:</b> {{ fecha_actual }}
       </p>
-      <h1 class="list">Listado de apoyo que ha Recibido la Caja</h1>
+      <h1 class="list">Listado de Apoyo que ha Recibido el Beneficio</h1>
       {% if mes %}
       <p style="text-align: center"><b>Fecha:</b> {{ mes }}</p>
       {% endif %}

@@ -23,7 +23,7 @@ def usuarios():
         SELECT usuarios.C_I AS Cedula, personal.Name_Com, usuarios.username, 
                personal.Location_Physical, personal.Location_Admin, usuarios.estado
         FROM usuarios
-        JOIN personal ON usuarios.C_I = personal.Cedula
+        LEFT JOIN personal ON usuarios.C_I = personal.Cedula
         WHERE 1=1
     '''
     params = []
@@ -82,7 +82,7 @@ def editar_usuario(cedula):
         SELECT usuarios.C_I AS Cedula, personal.Name_Com, usuarios.username, 
                personal.Location_Physical, usuarios.Password, usuarios.estado
         FROM usuarios
-        JOIN personal ON usuarios.C_I = personal.Cedula
+        LEFT JOIN personal ON usuarios.C_I = personal.Cedula
         WHERE usuarios.C_I = %s
     ''', (cedula,))
     usuario = cursor.fetchone()

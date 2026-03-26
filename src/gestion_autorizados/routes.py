@@ -126,8 +126,8 @@ def reporte_entregas_usuario():
             COUNT(*) as total_entregas,
             p.Name_Com AS staff_name
         FROM delivery d
-        JOIN usuarios u ON d.Staff_ID = u.C_I
-        JOIN personal p ON u.C_I = p.Cedula
+        LEFT JOIN usuarios u ON d.Staff_ID = u.C_I
+        LEFT JOIN personal p ON u.C_I = p.Cedula
         WHERE 1=1
     '''
     params = []
@@ -181,8 +181,8 @@ def reporte_entregas_usuario_excel():
                 COUNT(*) as total_entregas,
                 p.Name_Com AS staff_name
             FROM delivery d
-            JOIN usuarios u ON d.Staff_ID = u.C_I
-            JOIN personal p ON u.C_I = p.Cedula
+            LEFT JOIN usuarios u ON d.Staff_ID = u.C_I
+            LEFT JOIN personal p ON u.C_I = p.Cedula
             WHERE DATE(d.Time_box) = %s
             GROUP BY u.C_I, DATE(d.Time_box)
         ''', (fecha,))
@@ -194,8 +194,8 @@ def reporte_entregas_usuario_excel():
                 COUNT(*) as total_entregas,
                 p.Name_Com AS staff_name
             FROM delivery d
-            JOIN usuarios u ON d.Staff_ID = u.C_I
-            JOIN personal p ON u.C_I = p.Cedula
+            LEFT JOIN usuarios u ON d.Staff_ID = u.C_I
+            LEFT JOIN personal p ON u.C_I = p.Cedula
             GROUP BY u.C_I, DATE(d.Time_box)
         ''')
     
