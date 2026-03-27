@@ -6,7 +6,7 @@ from functools import wraps
 from flask import session, redirect, url_for, request
 from src.utils.constants import (
     REGEX_CEDULA, MIN_CEDULA_LENGTH, MAX_CEDULA_LENGTH,
-    MSG_ERROR_CEDULA_INVALIDA, LIMITE_MAXIMO_CONSULTAS
+ LIMITE_MAXIMO_CONSULTAS
 )
 
 
@@ -21,12 +21,12 @@ def validar_cedula(cedula):
         tuple: (bool, str) - (es_válida, mensaje_error)
     """
     if not cedula:
-        return False, MSG_ERROR_CEDULA_INVALIDA
+        return False
     
     cedula = cedula.strip()
     
     if not re.match(REGEX_CEDULA, cedula):
-        return False, MSG_ERROR_CEDULA_INVALIDA
+        return False
     
     return True, ""
 
@@ -72,7 +72,7 @@ def sanitizar_cedula_busqueda(cedula):
     
     cedula = cedula.strip().upper()
     
-    resultado = re.sub(r'[^V E 0-9]', '', cedula)
+    resultado = re.sub(r'[ 0-9]', '', cedula)
     
     return resultado
 

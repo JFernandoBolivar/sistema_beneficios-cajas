@@ -20,8 +20,8 @@ def usuarios():
     nombre = sanitizar_busqueda(request.args.get('nombre', ''))
     
     query = '''
-        SELECT usuarios.C_I AS Cedula, personal.Name_Com, usuarios.username, 
-               personal.Location_Physical, personal.Location_Admin, usuarios.estado
+        SELECT usuarios.C_I AS Cedula, COALESCE(personal.Name_Com, usuarios.username) AS Name_Com, 
+               usuarios.username, personal.Location_Physical, personal.Location_Admin, usuarios.estado
         FROM usuarios
         LEFT JOIN personal ON usuarios.C_I = personal.Cedula
         WHERE 1=1
@@ -33,13 +33,13 @@ def usuarios():
         params.append(f'%{cedula}%')
     
     if nombre:
-        query += ' AND personal.Name_Com LIKE %s'
+        query += ' AND COALESCE(personal.Name_Com, usuarios.username) LIKE %s'
         params.append(f'%{nombre}%')
     
     if not (cedula or nombre):
-        query += ' ORDER BY personal.Name_Com ASC LIMIT 10'
+        query += ' ORDER BY COALESCE(personal.Name_Com, usuarios.username) ASC LIMIT 10'
     else:
-        query += ' ORDER BY personal.Name_Com ASC LIMIT 50'
+        query += ' ORDER BY COALESCE(personal.Name_Com, usuarios.username) ASC LIMIT 50'
     
     cursor.execute(query, params if params else None)
     usuarios = cursor.fetchall()

@@ -12,7 +12,7 @@ from src.utils.validators import (
     formatear_fecha_sql, formatear_mes_sql, limitar_resultados
 )
 from src.utils.constants import (
-    ESTATUS_MAP, TIPO_NOMINA_CHOICES, MSG_ERROR_CEDULA_INVALIDA,
+    ESTATUS_MAP, TIPO_NOMINA_CHOICES, 
     MSG_ERROR_CEDULA_DUPLICADA, MSG_ERROR_AUTORIZADO_DUPLICADO,
     LIMITE_MAXIMO_CONSULTAS
 )
@@ -276,7 +276,7 @@ def NuevoUserActivo():
                 ''', (cedula, Nombre_Familiar, CIFamiliar))
                 mysql.connection.commit()
 
-            entregado = 1 if 'entregado' in request.form else 0
+            entregado = 1 if request.form.get('entregado') else 0
 
             if entregado:
                 cursor.execute('''
@@ -383,7 +383,7 @@ def NuevoUserPasivo():
                 ''', (cedula, Nombre_Familiar, CIFamiliar))
                 mysql.connection.commit()
             
-            entregado = 1 if 'entregado' in request.form else 0
+            entregado = 1 if request.form.get('entregado') else 0
 
             if entregado:
                 cursor.execute('''

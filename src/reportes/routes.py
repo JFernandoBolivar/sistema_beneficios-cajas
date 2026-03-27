@@ -241,7 +241,7 @@ def reporte_pdf():
                SUM(CASE WHEN action LIKE 'Marco como entregado%%' AND typeNomina = 'PENSIONADO INCAP VIUDA EXTINTA DISIP' THEN 1 ELSE 0 END) as total_pensionado_incap_viuda_extinto_disip,
                SUM(CASE WHEN action LIKE 'Marco como entregado%%' AND typeNomina = 'PENSIONADO INCAPACIDAD EMPLEADO' THEN 1 ELSE 0 END) as total_pensionado_incapacidad_empleado,
                SUM(CASE WHEN action LIKE 'Marco como entregado%%' AND typeNomina = 'PENSIONADO SOBREVIVIENTE' THEN 1 ELSE 0 END) as total_sobreviviente,
-               SUM(CASE WHEN action LIKE 'Marco como entregado%%' AND typeNomina = 'PENSIONADOS MENORES EXTINTA DISIP' THEN 1 ELSE 0 END) as total_pensionado_menores_extinto_disip,
+               SUM(CASE WHEN action LIKE 'Marco como entregado%%' AND typeNomina = 'PENSIONADO MENOR EXTINTA DISIP' THEN 1 ELSE 0 END) as total_pensionado_menores_extinto_disip,
                SUM(CASE WHEN action LIKE 'Marco como entregado%%' THEN 1 ELSE 0 END) as total_entregas
         FROM user_history
     '''

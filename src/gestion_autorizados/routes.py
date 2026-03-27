@@ -1,10 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, make_response
 import MySQLdb.cursors
 from datetime import datetime
 from babel.dates import format_date
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
-from io import BytesIO
+from weasyprint import HTML
 from extensions import mysql
 from src.utils.validators import sanitizar_busqueda
 from src.utils.constants import LIMITE_MAXIMO_CONSULTAS
@@ -164,8 +162,8 @@ def reporte_entregas_usuario():
                          nombre=nombre,
                          fecha=fecha)
 
-@gestion_autorizados_bp.route("/reporte_entregas_usuario_excel", methods=["GET", "POST"])
-def reporte_entregas_usuario_excel():
+@gestion_autorizados_bp.route("/reporte_entregas_usuario_pdf", methods=["GET", "POST"])
+def reporte_entregas_usuario_pdf():
     if 'loggedin' not in session:
         return redirect(url_for('auth.login'))
     
@@ -202,7 +200,6 @@ def reporte_entregas_usuario_excel():
     reportes = cursor.fetchall()
     cursor.close()
     
-    # Formatear fechas manualmente
     dias = {
         'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles',
         'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado',
@@ -216,8 +213,8 @@ def reporte_entregas_usuario_excel():
     }
     
     for reporte in reportes:
-        fecha = reporte['fecha']
-        fecha_str = fecha.strftime('%A, %d de %B de %Y')
+        fecha_rep = reporte['fecha']
+        fecha_str = fecha_rep.strftime('%A, %d de %B de %Y')
         
         for eng, esp in dias.items():
             fecha_str = fecha_str.replace(eng, esp)
@@ -226,45 +223,21 @@ def reporte_entregas_usuario_excel():
         
         reporte['fecha_formateada'] = fecha_str
     
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Reporte Entregas Usuario"
-
-    headers = ["Fecha", "Usuario", "Total Entregas"]
-    ws.append(headers)
-    header_fill = PatternFill(start_color="D3D3D3", end_color="D3D3D3", fill_type="solid")
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell.border = Border(left=Side(style='thin'), right=Side(style='thin'), 
-                             top=Side(style='thin'), bottom=Side(style='thin'))
-        cell.fill = header_fill
-
-    for reporte in reportes:
-        row = [
-            reporte['fecha_formateada'],
-            reporte['staff_name'],
-            reporte['total_entregas']
-        ]
-        ws.append(row)
-        for cell in ws[ws.max_row]:
-            cell.alignment = Alignment(wrap_text=True, horizontal="center", vertical="center")
-            cell.border = Border(left=Side(style='thin'), right=Side(style='thin'), 
-                                 top=Side(style='thin'), bottom=Side(style='thin'))
-
-    column_widths = {
-        'A': 30,  # Más ancho para la fecha formateada
-        'B': 40,  # Más ancho para el nombre
-        'C': 20   # Ancho para el total
-    }
-    for col, width in column_widths.items():
-        ws.column_dimensions[col].width = width
-
-    output = BytesIO()
-    wb.save(output)
-    output.seek(0)
-
-    fecha_actual = datetime.now().strftime('%Y-%m-%d')
-    nombre_archivo = f"Reporte_entregas_por_usuario_{fecha_actual}.xlsx"
-
-    return send_file(output, download_name=nombre_archivo, as_attachment=True)
+    usuario = session.get('username', 'Usuario')
+    fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M')
+    
+    if request.args.get('pdf') == '1':
+        rendered = render_template(
+            'autorizados/reporte_entregas_usuario_pdf.html',
+            reportes=reportes,
+            fecha=fecha,
+            usuario=usuario,
+            fecha_actual=fecha_actual
+        )
+        pdf = HTML(string=rendered).write_pdf()
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'inline; filename=reporte_entregas_usuario.pdf'
+        return response
+    
+    return render_template('autorizados/reporte_entregas_usuario.html', reportes=reportes, fecha=fecha)
